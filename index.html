@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0f1115">
+  <title>Portal OTP</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+
+    <header class="brand">
+      <div class="logo" aria-hidden="true">&#9679;</div>
+      <h1 id="storeName">Nama Toko</h1>
+      <p>Portal Kode OTP</p>
+    </header>
+
+    <!-- TAHAP 1: LOGIN PIN -->
+    <section id="viewLogin" class="card">
+      <h2>Masuk</h2>
+      <p class="muted">Masukkan PIN akses yang kamu terima dari admin.</p>
+      <form id="loginForm" autocomplete="off">
+        <label for="pin" class="sr-only">PIN Akses</label>
+        <input id="pin" type="text" inputmode="text" autocapitalize="characters"
+               autocomplete="off" spellcheck="false" maxlength="40" placeholder="Contoh: WF-8821" required>
+        <button type="submit" id="loginBtn" class="btn primary">Masuk</button>
+      </form>
+      <p id="loginError" class="msg error" role="alert" hidden></p>
+    </section>
+
+    <!-- TAHAP 2: DASHBOARD -->
+    <section id="viewDash" class="card" hidden>
+      <div class="dash-head">
+        <h2 id="greeting">Halo!</h2>
+        <button type="button" id="logoutBtn" class="link-btn">Keluar</button>
+      </div>
+      <p class="muted">Pilih layanan, lalu ambil kode OTP-nya.</p>
+
+      <div class="services">
+        <button type="button" id="btn-netflix" class="svc netflix">
+          <span class="title">Ambil OTP Netflix</span>
+          <span class="sub">Kode sign-in / link Household</span>
+        </button>
+
+        <button type="button" id="btn-disney" class="svc disney">
+          <span class="title">Ambil OTP Disney+</span>
+          <span class="sub">Kode verifikasi login</span>
+        </button>
+
+        <button type="button" id="btn-other" class="svc other">
+          <span class="title">Aplikasi Lainnya</span>
+          <span class="sub">Hubungi admin</span>
+        </button>
+      </div>
+
+      <!-- Kotak hasil -->
+      <div id="result" class="result" aria-live="polite" hidden></div>
+
+      <ol class="guide">
+        <li>Minta kode di aplikasi</li>
+        <li>Tunggu 10 detik</li>
+        <li>Klik tombol layanan di atas</li>
+      </ol>
+    </section>
+
+  </main>
+
+  <!-- Pop-up Aplikasi Lainnya -->
+  <div id="sheet" class="sheet-backdrop" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <h3 id="sheetTitle">Aplikasi Lainnya</h3>
+      <p class="muted">Hubungi admin untuk meminta kode aplikasi lain.</p>
+      <a id="waLink" class="btn wa" target="_blank" rel="noopener">Hubungi via WhatsApp</a>
+      <a id="tgLink" class="btn tg" target="_blank" rel="noopener">Hubungi via Telegram</a>
+      <button type="button" id="sheetClose" class="btn ghost">Tutup</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
