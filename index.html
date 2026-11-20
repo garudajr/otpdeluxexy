@@ -1,545 +1,799 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex, nofollow">
-<meta name="color-scheme" content="light dark">
-<title>Portal OTP</title>
-<style>
-:root{
-  --bg:#f4f4f5;--card:#fff;--subtle:#f8fafc;--box:#f1f5f9;--line:#e2e8f0;
-  --text:#0f172a;--muted:#64748b;--em:#10b981;--em-d:#059669;--err:#ef4444;
-  --shadow:0 20px 40px -15px rgba(15,23,42,.12);--btn:#0f172a;--btn-t:#fff;
-}
-:root[data-theme="dark"]{
-  --bg:#090d16;--card:#111827;--subtle:#182234;--box:#1e293b;--line:#2d3a4f;
-  --text:#f8fafc;--muted:#94a3b8;--em-d:#34d399;--shadow:0 24px 48px -12px rgba(0,0,0,.65);
-  --btn:#10b981;--btn-t:#052e16;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%}
-body{
-  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;
-  display:flex;justify-content:center;align-items:center;
-  padding:max(18px,env(safe-area-inset-top)) 18px max(18px,env(safe-area-inset-bottom));
-  transition:background .3s,color .3s;
-}
-[hidden]{display:none!important}
-button,input,a{font:inherit}
-:focus-visible{outline:3px solid rgba(59,130,246,.55);outline-offset:2px}
-.card{
-  width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);
-  border-radius:24px;box-shadow:var(--shadow);padding:24px 22px 26px;
-  transition:background .3s,border-color .3s;
-}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.badge{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);
-  background:var(--subtle);border:1px solid var(--line);padding:6px 12px;border-radius:999px}
-.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--subtle);
-  color:var(--text);display:grid;place-items:center;cursor:pointer;transition:transform .2s,border-color .2s}
-.icon-btn:hover{transform:scale(1.06);border-color:var(--em)}
-.icon-btn svg{width:18px;height:18px}
-.head{text-align:center;margin-bottom:22px}
-.head h1{font-size:23px;font-weight:800;letter-spacing:-.4px;margin-bottom:6px}
-.head p{font-size:13.5px;line-height:1.5;color:var(--muted)}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Portal OTP</title>
+  <!-- Terapkan tema sebelum render supaya tidak berkedip -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('portal_otp_theme');
+        if (!t) t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    :root {
+      --bg-page: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --bg-box: #f1f5f9;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --shadow-card: 0 20px 40px -15px rgba(15, 23, 42, 0.1);
+      --shadow-box: inset 0 2px 4px rgba(15, 23, 42, 0.04);
+      --emerald: #10b981;
+      --emerald-light: #6ee7b7;
+      --emerald-dark: #059669;
+    }
+    [data-theme="dark"] {
+      --bg-page: #090d16;
+      --bg-card: #111827;
+      --bg-subtle: #182234;
+      --bg-box: #1e293b;
+      --border-color: #2d3a4f;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --shadow-card: 0 24px 48px -12px rgba(0, 0, 0, 0.65);
+      --shadow-box: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+    }
 
-/* PIN */
-.pin-stage{min-height:92px;display:flex;align-items:center;justify-content:center;position:relative}
-.pin-input{
-  width:100%;height:64px;border-radius:16px;border:2px solid var(--line);background:var(--box);
-  color:var(--text);text-align:center;font-size:22px;font-weight:700;letter-spacing:4px;
-  text-transform:uppercase;outline:none;caret-color:var(--em);
-  transition:border-color .25s,background .25s,transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;
-}
-.pin-input::placeholder{letter-spacing:0;font-size:15px;font-weight:500;color:var(--muted);text-transform:none}
-.pin-input:focus{border-color:#3b82f6;background:var(--card);transform:translateY(-2px)}
-.pin-input.bad{border-color:var(--err);animation:shake .4s}
-.pin-input.ok{background:var(--em);border-color:var(--em);color:#fff;transform:scale(1.03);
-  box-shadow:0 8px 20px -4px rgba(16,185,129,.5)}
-@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
 
-.verify{display:none;position:relative;justify-content:center}
-.verify.on{display:flex;animation:pop .35s cubic-bezier(.34,1.56,.64,1)}
-@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
-.verify svg{width:86px;height:86px;overflow:visible}
-.ring-bg{fill:none;stroke:#6ee7b7;stroke-width:3.5;opacity:.45}
-.ring{fill:none;stroke:var(--em);stroke-width:4;stroke-linecap:round;stroke-dasharray:220;stroke-dashoffset:220;
-  transform:rotate(-90deg);transform-origin:43px 43px}
-.tick{fill:none;stroke:var(--em);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;
-  stroke-dasharray:52;stroke-dashoffset:52}
-.verify.on .ring{animation:draw .65s cubic-bezier(.65,0,.35,1) forwards}
-.verify.on .tick{animation:draw .4s .3s cubic-bezier(.65,0,.35,1) forwards}
-@keyframes draw{to{stroke-dashoffset:0}}
-.confetti{position:absolute;top:43px;left:50%;width:0;height:0;pointer-events:none}
-.confetti i{position:absolute;width:7px;height:7px;border-radius:2px;opacity:0;animation:burst .85s cubic-bezier(.16,1,.3,1) forwards}
-@keyframes burst{0%{opacity:1;transform:translate(0,0) rotate(0) scale(.6)}75%{opacity:1}
-  100%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(var(--r)) scale(1)}}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+      transition: background-color .3s ease, color .3s ease;
+    }
 
-/* BUTTONS */
-.btn{width:100%;min-height:48px;padding:13px 18px;border:0;border-radius:14px;font-size:15px;font-weight:700;
-  cursor:pointer;display:flex;justify-content:center;align-items:center;gap:10px;text-decoration:none;
-  transition:transform .18s,box-shadow .25s,opacity .2s}
-.btn:active:not(:disabled){transform:scale(.98)}
-.btn:disabled{opacity:.55;cursor:not-allowed}
-.btn-primary{background:var(--btn);color:var(--btn-t);margin-top:6px}
-.err{color:var(--err);font-size:13px;font-weight:500;text-align:center;margin-top:12px;min-height:18px}
+    .card {
+      background: var(--bg-card);
+      width: 100%;
+      max-width: 420px;
+      padding: 26px 24px 28px;
+      border-radius: 24px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-color);
+      transition: background-color .3s ease, border-color .3s ease;
+    }
 
-/* DASHBOARD */
-.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 8px 8px 14px;
-  background:var(--subtle);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;font-size:13px}
-.who{display:flex;align-items:center;gap:8px;font-weight:700;min-width:0}
-.who span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--em);box-shadow:0 0 0 3px rgba(16,185,129,.2)}
-.link-btn{min-height:36px;background:transparent;border:1px solid var(--line);color:var(--muted);
-  padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
-.link-btn:hover{color:var(--text);border-color:var(--muted)}
-.services{display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
-.svc{justify-content:space-between;text-align:left;color:#fff;padding:16px 18px;border-radius:16px}
-.svc-nf{background:radial-gradient(circle at 85% 50%,#3b080c 0%,#0a0a0a 72%);border:1px solid rgba(229,9,20,.45);
-  box-shadow:0 10px 24px -8px rgba(229,9,20,.35)}
-.svc-ds{background:radial-gradient(circle at 50% 85%,#0b3b8c 0%,#050b24 78%);border:1px solid rgba(56,189,248,.38);
-  box-shadow:0 10px 24px -8px rgba(0,99,229,.38)}
-.svc:hover:not(:disabled){transform:translateY(-2px)}
-.svc-name{display:block;font-size:20px;line-height:1.1}
-.svc-nf .svc-name{font-family:Impact,"Arial Black",sans-serif;letter-spacing:1.5px;color:#e50914}
-.svc-ds .svc-name{font-family:Georgia,serif;font-style:italic;font-weight:700}
-.svc-sub{display:block;font-size:11.5px;font-weight:500;opacity:.8;margin-top:5px}
-.pill{flex:none;font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.14);white-space:nowrap}
-.btn-other{background:var(--subtle);color:var(--text);border:1px solid var(--line);font-size:14px}
-.btn-other:hover{border-color:var(--muted)}
-.other{display:flex;flex-direction:column;gap:10px;margin-top:10px;padding:12px;background:var(--subtle);
-  border:1px solid var(--line);border-radius:14px;animation:fade .25s}
-.btn-wa{background:#16a34a;color:#fff;font-size:13.5px}
-.btn-tg{background:#0284c7;color:#fff;font-size:13.5px}
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    /* TOP BAR */
+    .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .brand-badge {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
+      color: var(--text-muted); background: var(--bg-subtle);
+      padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border-color);
+      max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .theme-btn {
+      width: 38px; height: 38px; border-radius: 12px; border: 1px solid var(--border-color);
+      background: var(--bg-subtle); color: var(--text-main);
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      transition: border-color .2s ease;
+    }
+    .theme-btn:hover { border-color: var(--emerald); }
+    .theme-btn svg { width: 18px; height: 18px; }
 
-/* RESULT */
-.result{margin-top:16px;padding:18px 14px;background:var(--subtle);border:1px solid var(--line);
-  border-radius:16px;text-align:center;animation:fade .3s}
-.result .note{font-size:13px;color:var(--muted);line-height:1.5}
-.result .note.error{color:var(--err);font-weight:500}
-.result .label{font-size:12.5px;color:var(--muted)}
-.cells{display:flex;justify-content:center;gap:8px;margin:12px 0}
-.cell{width:42px;height:50px;border-radius:11px;background:var(--card);border:1.5px solid var(--em);color:var(--em-d);
-  font:800 22px ui-monospace,"JetBrains Mono",Menlo,monospace;display:grid;place-items:center;
-  box-shadow:0 6px 14px -4px rgba(16,185,129,.25);animation:pop .35s backwards}
-.btn-copy,.btn-open{display:inline-flex;width:auto;min-height:40px;padding:8px 16px;border-radius:10px;font-size:13px;margin:4px 3px 0}
-.btn-copy{background:var(--card);color:var(--text);border:1px solid var(--line)}
-.btn-copy:hover{border-color:var(--em)}
-.btn-open{background:#e50914;color:#fff}
-.meta{margin-top:10px;font-size:11.5px;color:var(--muted)}
-.spinner{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--em);border-radius:50%;
-  animation:spin .75s linear infinite;margin:0 auto 8px}
-@keyframes spin{to{transform:rotate(360deg)}}
+    /* HEADER */
+    .header { text-align: center; margin-bottom: 22px; }
+    .header h1 { font-size: 23px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 6px; }
+    .header p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; }
 
-.guide{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.7}
-.guide ol{padding-left:18px}
+    /* INPUT PIN (1 kolom: aman untuk paste / autofill / PIN 6-8 karakter) */
+    .pin-input {
+      width: 100%; height: 64px; margin-bottom: 14px;
+      border-radius: 14px; border: 2px solid var(--border-color);
+      background: var(--bg-box); box-shadow: var(--shadow-box);
+      color: var(--text-main); font-size: 22px; font-weight: 700;
+      letter-spacing: .14em; text-align: center; text-transform: uppercase;
+      outline: none; caret-color: var(--emerald);
+      transition: border-color .2s ease, background-color .2s ease;
+    }
+    .pin-input::placeholder { font-size: 15px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text-muted); }
+    .pin-input:focus { border-color: #3b82f6; background: var(--bg-card); }
+    .pin-input.error { border-color: #ef4444; }
+    .shake { animation: shakeX .4s ease; }
+    @keyframes shakeX {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-7px); }
+      40%, 80% { transform: translateX(7px); }
+    }
 
-@media (max-width:380px){.card{padding:20px 16px 22px}.pin-input{font-size:19px}.cell{width:36px;height:44px;font-size:19px}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-</style>
+    /* ANIMASI SUKSES: kotak menyala hijau -> jadi titik -> centang + confetti
+       (hanya transform / opacity / stroke, jadi ringan di HP) */
+    .verify { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 150px; }
+    .pin-boxes { display: flex; justify-content: center; gap: 6px; width: 100%; margin-bottom: 8px; }
+    .pin-box {
+      flex: 1 1 0; max-width: 40px; aspect-ratio: 1 / 1;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 11px; border: 2px solid var(--border-color); background: var(--bg-box);
+      font-size: 18px; font-weight: 700; color: var(--text-main);
+      transition: background-color .25s ease, border-color .25s ease, color .2s ease,
+                  transform .35s cubic-bezier(.4, 0, .2, 1), border-radius .35s ease;
+    }
+    .pin-box.filled { background: var(--emerald); border-color: var(--emerald); color: #fff; }
+    .pin-box.dot { border-radius: 50%; color: transparent; }
+
+    .verify-done { position: relative; display: flex; flex-direction: column; align-items: center; animation: popIn .3s ease; }
+    .verify-done p { margin-top: 10px; font-size: 14px; font-weight: 600; color: var(--emerald-dark); }
+    .check-svg { width: 80px; height: 80px; }
+    .ring-bg { fill: none; stroke: var(--emerald-light); stroke-width: 3.5; opacity: .45; }
+    .ring-progress {
+      fill: none; stroke: var(--emerald); stroke-width: 4; stroke-linecap: round;
+      stroke-dasharray: 220; stroke-dashoffset: 220;
+      transform: rotate(-90deg); transform-origin: 43px 43px;
+      animation: draw .5s cubic-bezier(.65, 0, .35, 1) forwards;
+    }
+    .check-path {
+      fill: none; stroke: var(--emerald); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: 52; stroke-dashoffset: 52;
+      animation: draw .35s .25s cubic-bezier(.65, 0, .35, 1) forwards;
+    }
+    .confetti-layer { position: absolute; top: 40px; left: 50%; width: 0; height: 0; pointer-events: none; }
+    .confetti-piece {
+      position: absolute; width: 7px; height: 7px; border-radius: 2px; opacity: 0;
+      animation: burst .85s cubic-bezier(.16, 1, .3, 1) forwards;
+    }
+    @keyframes burst {
+      0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(.6); }
+      75% { opacity: 1; }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(1); }
+    }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    @keyframes popIn { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* BUTTONS */
+    .btn {
+      width: 100%; padding: 14px 18px; border: none; border-radius: 14px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      display: flex; justify-content: center; align-items: center; gap: 10px;
+      text-decoration: none; transition: transform .15s ease, opacity .2s ease, border-color .2s ease;
+    }
+    .btn:active:not(:disabled) { transform: scale(.98); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-primary { background: #0f172a; color: #fff; }
+    [data-theme="dark"] .btn-primary { background: var(--emerald); color: #052e16; }
+
+    .service-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+    .btn-service { justify-content: space-between; text-align: left; color: #fff; padding: 16px 18px; border-radius: 16px; }
+    .btn-service.is-off { opacity: .6; }
+    .service-left { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+    .service-left svg { max-width: 100%; height: auto; }
+    .service-meta { display: flex; flex-direction: column; }
+    .service-sub { font-size: 11.5px; font-weight: 500; opacity: .78; }
+    .service-pill {
+      font-size: 11.5px; font-weight: 700; padding: 6px 11px; border-radius: 999px;
+      background: rgba(255, 255, 255, .14); white-space: nowrap;
+    }
+    .btn-netflix {
+      background: radial-gradient(circle at 85% 50%, #3b080c 0%, #0a0a0a 72%);
+      border: 1px solid rgba(229, 9, 20, .45);
+    }
+    .btn-netflix:hover:not(:disabled) { border-color: #e50914; }
+    .btn-disney {
+      background: radial-gradient(circle at 50% 85%, #0b3b8c 0%, #050b24 78%);
+      border: 1px solid rgba(56, 189, 248, .38);
+    }
+    .btn-disney:hover:not(:disabled) { border-color: #38bdf8; }
+
+    .btn-other { background: var(--bg-subtle); color: var(--text-main); border: 1px solid var(--border-color); font-size: 14px; }
+    .btn-other:hover { border-color: var(--text-muted); }
+    .other-box {
+      display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding: 12px;
+      background: var(--bg-subtle); border-radius: 14px; border: 1px solid var(--border-color);
+      animation: fadeSlide .25s ease;
+    }
+    .btn-wa { background: #16a34a; color: #fff; font-size: 13.5px; padding: 11px; border-radius: 11px; }
+    .btn-tg { background: #0284c7; color: #fff; font-size: 13.5px; padding: 11px; border-radius: 11px; }
+
+    /* DASHBOARD BAR */
+    .dash-bar {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      padding: 10px 14px; background: var(--bg-subtle); border: 1px solid var(--border-color);
+      border-radius: 12px; margin-bottom: 16px; font-size: 13px;
+    }
+    .pin-tag { display: flex; align-items: center; gap: 8px; font-weight: 700; min-width: 0; flex: 1; }
+    .pin-tag span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dot-online { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 0 3px rgba(16, 185, 129, .2); }
+    .session { flex: none; font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .logout-btn {
+      flex: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
+      padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .logout-btn:hover:not(:disabled) { color: var(--text-main); border-color: var(--text-muted); }
+    .logout-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* HASIL */
+    .result-box {
+      margin-top: 16px; padding: 18px 14px; background: var(--bg-subtle);
+      border-radius: 16px; border: 1px solid var(--border-color); text-align: center;
+      animation: fadeSlide .3s ease;
+    }
+    .otp-digits-row { display: flex; justify-content: center; gap: 8px; margin: 12px 0; }
+    .otp-cell {
+      flex: 1 1 0; max-width: 42px; height: 50px; border-radius: 11px;
+      background: var(--bg-card); border: 1.5px solid var(--emerald); color: var(--emerald-dark);
+      font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      animation: popIn .3s backwards;
+    }
+    [data-theme="dark"] .otp-cell { color: #34d399; }
+    .otp-link {
+      display: inline-block; margin: 10px 0; padding: 11px 16px; background: #e50914; color: #fff;
+      border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none;
+    }
+    .btn-copy {
+      background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);
+      padding: 8px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; margin-top: 4px;
+    }
+    .btn-copy:hover { border-color: var(--emerald); }
+    .msg-info { color: var(--text-muted); font-size: 12.5px; line-height: 1.5; }
+    .msg-warn { color: #d97706; font-size: 12.5px; font-weight: 600; line-height: 1.5; margin-top: 12px; }
+    .countdown { margin-top: 6px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .msg-error { color: #ef4444; font-size: 13px; font-weight: 500; margin-top: 12px; text-align: center; min-height: 18px; }
+    .msg-error.info { color: var(--text-muted); }
+    .result-box .msg-error { margin-top: 0; }
+    .spinner {
+      width: 22px; height: 22px; border: 3px solid var(--border-color); border-top-color: var(--emerald);
+      border-radius: 50%; animation: spin .75s linear infinite; margin: 0 auto 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .guide {
+      margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-color);
+      font-size: 12px; color: var(--text-muted); line-height: 1.65;
+    }
+
+    @media (max-width: 380px) {
+      .card { padding: 22px 18px 24px; }
+      .otp-cell { height: 44px; font-size: 19px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition: none !important; }
+    }
+  </style>
 </head>
 <body>
-<main class="card">
-  <div class="top">
-    <span class="badge" id="brand">Portal OTP</span>
-    <button type="button" class="icon-btn" id="themeBtn" aria-label="Ganti mode gelap / terang"></button>
-  </div>
 
-  <!-- LOGIN -->
-  <section id="viewLogin">
-    <div class="head">
-      <h1>Verifikasi PIN</h1>
-      <p>Masukkan PIN akses dari admin untuk mengambil kode OTP.</p>
+  <div class="card">
+    <div class="card-top">
+      <span class="brand-badge" id="brandBadge">PORTAL OTP</span>
+      <button class="theme-btn" id="themeBtn" type="button" title="Ganti mode gelap / terang" aria-label="Ganti tema"></button>
     </div>
-    <form id="loginForm" autocomplete="off" novalidate>
-      <div class="pin-stage">
-        <input id="pin" class="pin-input" type="text" maxlength="40" inputmode="text" enterkeyhint="go"
+
+    <!-- HALAMAN 1: LOGIN PIN -->
+    <section id="loginView">
+      <div class="header">
+        <h1>Verifikasi PIN</h1>
+        <p>Masukkan PIN akses yang diberikan admin untuk mengambil OTP</p>
+      </div>
+
+      <form id="loginForm" autocomplete="off" novalidate>
+        <input id="pin" class="pin-input" type="text" inputmode="text" enterkeyhint="go"
                autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false"
-               placeholder="Contoh: WF-K3M9X7QA" aria-label="PIN akses" aria-describedby="loginErr">
-        <div class="verify" id="verify" aria-hidden="true">
-          <div class="confetti" id="confetti"></div>
-          <svg viewBox="0 0 86 86">
-            <circle class="ring-bg" cx="43" cy="43" r="35"/>
-            <circle class="ring" cx="43" cy="43" r="35"/>
-            <polyline class="tick" points="28,44 39,55 59,33"/>
+               maxlength="40" placeholder="Masukkan PIN" aria-label="PIN akses">
+        <button id="loginBtn" class="btn btn-primary" type="submit">Verifikasi &amp; Masuk</button>
+      </form>
+
+      <div id="verify" class="verify" hidden>
+        <div id="pinBoxes" class="pin-boxes"></div>
+        <div id="verifyDone" class="verify-done" hidden>
+          <div id="confetti" class="confetti-layer"></div>
+          <svg class="check-svg" viewBox="0 0 86 86" aria-hidden="true">
+            <circle class="ring-bg" cx="43" cy="43" r="35"></circle>
+            <circle class="ring-progress" cx="43" cy="43" r="35"></circle>
+            <polyline class="check-path" points="28,44 39,55 59,33"></polyline>
           </svg>
+          <p>PIN terverifikasi</p>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary" id="loginBtn">Verifikasi &amp; Masuk</button>
-    </form>
-    <p id="loginErr" class="err" role="alert"></p>
-  </section>
 
-  <!-- DASHBOARD -->
-  <section id="viewDash" hidden>
-    <div class="bar">
-      <div class="who"><span class="dot"></span><span id="greeting">Halo!</span></div>
-      <button type="button" class="link-btn" id="logoutBtn">Ganti PIN</button>
-    </div>
+      <div id="loginError" class="msg-error" role="alert"></div>
+    </section>
 
-    <div class="services">
-      <button type="button" class="btn svc svc-nf" id="btn-netflix">
-        <span><span class="svc-name">NETFLIX</span><span class="svc-sub">Kode login / Household</span></span>
-        <span class="pill">Ambil OTP</span>
-      </button>
-      <button type="button" class="btn svc svc-ds" id="btn-disney">
-        <span><span class="svc-name">Disney+</span><span class="svc-sub">Passcode 6 digit</span></span>
-        <span class="pill">Ambil OTP</span>
-      </button>
-    </div>
+    <!-- HALAMAN 2: DASHBOARD -->
+    <section id="dashView" hidden>
+      <div class="dash-bar">
+        <div class="pin-tag"><span class="dot-online"></span><span id="greeting">Halo!</span></div>
+        <span class="session" id="sessionLabel"></span>
+        <button class="logout-btn" id="logoutBtn" type="button">Keluar</button>
+      </div>
 
-    <button type="button" class="btn btn-other" id="otherBtn" aria-expanded="false" aria-controls="other">Aplikasi Lainnya</button>
-    <div class="other" id="other" hidden>
-      <a id="waLink" class="btn btn-wa" target="_blank" rel="noopener noreferrer">Hubungi via WhatsApp</a>
-      <a id="tgLink" class="btn btn-tg" target="_blank" rel="noopener noreferrer">Hubungi via Telegram</a>
-    </div>
+      <div class="service-grid">
+        <button class="btn btn-service btn-netflix" id="btn-netflix" type="button">
+          <span class="service-left">
+            <svg width="92" height="26" viewBox="0 0 110 30" fill="none" aria-label="Netflix" role="img">
+              <text x="1" y="24" fill="#E50914" font-family="Impact, Arial Black, sans-serif" font-size="26" textLength="104" lengthAdjust="spacingAndGlyphs">NETFLIX</text>
+            </svg>
+            <span class="service-meta"><span class="service-sub">Kode login / Household</span></span>
+          </span>
+          <span class="service-pill">Ambil OTP</span>
+        </button>
 
-    <div id="result" aria-live="polite"></div>
+        <button class="btn btn-service btn-disney" id="btn-disney" type="button">
+          <span class="service-left">
+            <svg width="96" height="34" viewBox="0 0 130 46" fill="none" aria-label="Disney+ Hotstar" role="img">
+              <path d="M36 12 C56 2, 86 4, 100 18" stroke="url(#disneyArc)" stroke-width="2.4" stroke-linecap="round"/>
+              <defs>
+                <linearGradient id="disneyArc" x1="36" y1="12" x2="100" y2="18" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#0284c7" stop-opacity="0.1"/>
+                  <stop offset="100%" stop-color="#38bdf8"/>
+                </linearGradient>
+              </defs>
+              <text x="4" y="26" fill="#FFFFFF" font-family="Georgia, serif" font-style="italic" font-weight="bold" font-size="21">Disney+</text>
+              <text x="6" y="41" fill="#E0F2FE" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="13" letter-spacing="0.5">hotstar</text>
+            </svg>
+            <span class="service-meta"><span class="service-sub">Kode verifikasi login</span></span>
+          </span>
+          <span class="service-pill">Ambil OTP</span>
+        </button>
+      </div>
 
-    <div class="guide">
-      <strong>Cara ambil OTP:</strong>
-      <ol>
-        <li>Klik <b>Kirim Kode</b> di aplikasi Netflix / Disney+.</li>
-        <li>Tunggu sekitar <b>10 detik</b>.</li>
-        <li>Pilih layanan di atas untuk memunculkan kode.</li>
-      </ol>
-    </div>
-  </section>
-</main>
+      <button class="btn btn-other" id="otherBtn" type="button" aria-expanded="false">Aplikasi Lainnya</button>
+      <div class="other-box" id="otherBox" hidden>
+        <a id="waLink" class="btn btn-wa" target="_blank" rel="noopener">Hubungi via WhatsApp</a>
+        <a id="tgLink" class="btn btn-tg" target="_blank" rel="noopener">Hubungi via Telegram</a>
+      </div>
 
-<script>
-(function () {
-  'use strict';
+      <div class="result-box" id="resultBox" hidden aria-live="polite"></div>
 
-  /* ============ PENGATURAN (WAJIB DIISI) ============ */
-  var CONFIG = {
-    API_URL: 'https://script.google.com/macros/s/AKfycbz_7ugFqTtnX2324JUum2uskGYmxm6Shz3a32gD5OmSHaTaLhqDOmOOXuKpPfkGIf6FPw/exec', // URL Web App berakhiran /exec
-    STORE_NAME: 'Deluxexy',
-    WA_NUMBER: '6282245222845',        // awali 62, tanpa +
-    WA_MESSAGE: 'Halo admin, saya mau minta OTP untuk aplikasi lainnya.',
-    TELEGRAM_USERNAME: 'roock', // tanpa @
-    COOLDOWN_SECONDS: 20,
-    REQUEST_TIMEOUT_MS: 25000
-  };
-  /* ================================================== */
+      <div class="guide">
+        <strong>Cara Ambil OTP:</strong><br>
+        1. Klik <b>Kirim Kode</b> di aplikasi Netflix / Disney+.<br>
+        2. Tunggu sekitar <b>10 detik</b>.<br>
+        3. Pilih layanan di atas untuk memunculkan kode.
+      </div>
+    </section>
+  </div>
 
-  var LABEL = { netflix: 'Netflix', disney: 'Disney+' };
-  var SERVICES = ['netflix', 'disney'];
-  var KEY_PIN = 'otp_pin', KEY_THEME = 'otp_theme';
-  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  <script>
+    /* ============ PENGATURAN WAJIB DIISI ============ */
+    const CONFIG = {
+      API_URL: 'GANTI_DENGAN_URL_WEB_APP_APPS_SCRIPT',   // URL Web App Apps Script (berakhiran /exec)
+      STORE_NAME: 'Deluxexy',
+      WA_NUMBER: '628xxxxxxxxxx',                         // awali 62, tanpa +
+      WA_MESSAGE: 'Halo admin, saya mau minta OTP untuk aplikasi lainnya.',
+      TELEGRAM_USERNAME: 'usernamekamu',                  // tanpa @
+      IDLE_SECONDS: 180,           // logout otomatis bila tidak menekan tombol layanan (3 menit)
+      RESULT_SECONDS: 60,          // waktu menyalin kode sebelum logout otomatis
+      COOLDOWN_SECONDS: 15,        // jeda bila kode belum masuk
+      REQUEST_TIMEOUT_MS: 25000
+    };
+    /* ================================================= */
 
-  var $ = function (id) { return document.getElementById(id); };
-  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, reduceMotion ? 0 : ms); }); };
-  var store = {
-    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
-    del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
-  };
-  function el(tag, cls, text) {
-    var e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text !== undefined) e.textContent = text;
-    return e;
-  }
+    (function () {
+      'use strict';
 
-  var state = { pin: null, name: '', services: { netflix: false, disney: false } };
-  var busy = {}, timers = {}, verifying = false;
+      var SERVICES = ['netflix', 'disney'];
+      var NAME = { netflix: 'Netflix', disney: 'Disney+ Hotstar' };
+      var KEY_THEME = 'portal_otp_theme';
 
-  /* ---------- Tema ---------- */
-  var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>';
-  var MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>';
-  function applyTheme(t) {
-    document.documentElement.setAttribute('data-theme', t);
-    $('themeBtn').innerHTML = t === 'dark' ? SUN : MOON;
-    var m = document.querySelector('meta[name="color-scheme"]');
-    if (m) m.content = t;
-  }
-  function initTheme() {
-    var saved = store.get(KEY_THEME);
-    var dark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
-    applyTheme(saved || (dark ? 'dark' : 'light'));
-    $('themeBtn').addEventListener('click', function () {
-      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      store.set(KEY_THEME, next);
-      applyTheme(next);
-    });
-  }
+      var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+      var MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
 
-  /* ---------- API (POST, sesuai Code.gs) ---------- */
-  function api(payload) {
-    if (!CONFIG.API_URL || CONFIG.API_URL.indexOf('TEMPEL_') === 0) {
-      return Promise.resolve({ ok: false, error: 'Website belum dikonfigurasi (API_URL kosong).' });
-    }
-    var ctrl = new AbortController();
-    var t = setTimeout(function () { ctrl.abort(); }, CONFIG.REQUEST_TIMEOUT_MS);
-    // text/plain agar tidak memicu preflight CORS (Apps Script tidak mendukung OPTIONS)
-    return fetch(CONFIG.API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
-      signal: ctrl.signal,
-      redirect: 'follow'
-    }).then(function (res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    }).catch(function (e) {
-      return { ok: false, error: e && e.name === 'AbortError'
-        ? 'Server terlalu lama merespons. Coba lagi.'
-        : 'Tidak dapat terhubung ke server. Periksa koneksi internet kamu.' };
-    }).then(function (r) { clearTimeout(t); return r; });
-  }
+      function $(id) { return document.getElementById(id); }
+      function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+      var reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-  /* ---------- Login ---------- */
-  function setLoginError(msg) { $('loginErr').textContent = msg || ''; }
+      var ls = {
+        get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+        set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+      };
 
-  function flagBad() {
-    var inp = $('pin');
-    inp.classList.remove('bad'); void inp.offsetWidth; inp.classList.add('bad');
-  }
+      // PIN sengaja TIDAK disimpan di browser (PIN bersifat sekali pakai)
+      var state = { pin: '', name: '', services: { netflix: false, disney: false } };
+      var busy = { netflix: false, disney: false };
+      var cooldownUntil = { netflix: 0, disney: 0 };
+      var mode = 'idle';          // 'idle' = menunggu klik layanan | 'result' = kode tampil, hitung mundur logout
+      var deadline = 0;           // waktu (ms) kapan auto-logout terjadi
+      var ticker = null;
+      var countdownEl = null;
+      var isLoggingIn = false;
 
-  function confetti() {
-    var layer = $('confetti'), colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#06b6d4'];
-    layer.textContent = '';
-    for (var i = 0; i < 22; i++) {
-      var p = document.createElement('i');
-      var a = (Math.PI * 2 * i) / 22 + Math.random() * 0.3, d = 52 + Math.random() * 44;
-      p.style.setProperty('--tx', Math.cos(a) * d + 'px');
-      p.style.setProperty('--ty', Math.sin(a) * d + 'px');
-      p.style.setProperty('--r', Math.random() * 360 + 'deg');
-      p.style.background = colors[i % colors.length];
-      layer.appendChild(p);
-    }
-  }
+      /* ---------- Tema ---------- */
+      function applyThemeIcon() {
+        $('themeBtn').innerHTML = document.documentElement.getAttribute('data-theme') === 'dark' ? SUN : MOON;
+      }
+      function toggleTheme() {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        ls.set(KEY_THEME, next);
+        applyThemeIcon();
+      }
 
-  function playSuccess() {
-    var inp = $('pin');
-    inp.classList.add('ok');
-    return wait(450).then(function () {
-      inp.style.display = 'none';
-      $('verify').classList.add('on');
-      confetti();
-      return wait(1100);
-    });
-  }
+      /* ---------- API ---------- */
+      function api(payload) {
+        if (!CONFIG.API_URL || CONFIG.API_URL.indexOf('GANTI_DENGAN') === 0) {
+          return Promise.resolve({ ok: false, error: 'Website belum dikonfigurasi (API_URL masih kosong).' });
+        }
+        var ctrl = new AbortController();
+        var t = setTimeout(function () { ctrl.abort(); }, CONFIG.REQUEST_TIMEOUT_MS);
+        // POST + text/plain => tanpa preflight CORS; PIN tidak ikut ke URL / riwayat browser
+        return fetch(CONFIG.API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload),
+          signal: ctrl.signal,
+          redirect: 'follow'
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .catch(function (e) {
+            return {
+              ok: false,
+              error: e && e.name === 'AbortError'
+                ? 'Server terlalu lama merespons. Coba lagi.'
+                : 'Gagal terhubung ke server. Periksa koneksi atau URL API.'
+            };
+          })
+          .then(function (r) { clearTimeout(t); return r; });
+      }
 
-  function resetLoginView() {
-    var inp = $('pin');
-    inp.style.display = '';
-    inp.classList.remove('ok', 'bad');
-    inp.value = '';
-    $('verify').classList.remove('on');
-    setLoginError('');
-  }
+      /* ---------- Util DOM ---------- */
+      function el(tag, cls, text) {
+        var e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (text !== undefined) e.textContent = text;
+        return e;
+      }
+      function shake(node) {
+        node.classList.remove('shake');
+        void node.offsetWidth;
+        node.classList.add('shake');
+      }
+      function fmt(sec) { return Math.floor(sec / 60) + ':' + ('0' + (sec % 60)).slice(-2); }
+      function ago(s) { return s < 60 ? s + ' detik' : Math.round(s / 60) + ' menit'; }
+      function copyText(text, btn) {
+        function done() {
+          var old = btn.textContent;
+          btn.textContent = 'Tersalin!';
+          btn.style.borderColor = '#10b981';
+          setTimeout(function () { btn.textContent = old; btn.style.borderColor = ''; }, 1800);
+        }
+        function fallback() {
+          var ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); } catch (e) {}
+          document.body.removeChild(ta);
+          done();
+        }
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(done, fallback);
+        } else { fallback(); }
+      }
 
-  function enterDashboard(res, pin) {
-    state.pin = pin;
-    state.name = res.name || '';
-    state.services = res.services || { netflix: false, disney: false };
-    store.set(KEY_PIN, pin);
-    $('greeting').textContent = state.name ? 'Halo, ' + state.name + '!' : 'Halo!';
-    $('viewLogin').hidden = true;
-    $('viewDash').hidden = false;
-    SERVICES.forEach(tick);
-  }
+      /* ---------- Pesan di halaman login ---------- */
+      function setLoginMsg(msg, info) {
+        var box = $('loginError');
+        box.textContent = msg || '';
+        box.classList.toggle('info', !!info);
+      }
 
-  function login(pin, silent) {
-    if (verifying) return Promise.resolve();
-    verifying = true;
-    var btn = $('loginBtn');
-    btn.disabled = true;
-    btn.textContent = 'Memverifikasi PIN...';
-    if (!silent) setLoginError('');
+      /* ---------- Timer: idle 3 menit / hitung mundur 60 detik / cooldown ---------- */
+      function isBusy() { return busy.netflix || busy.disney; }
 
-    return api({ action: 'login', pin: pin }).then(function (res) {
-      if (res && res.ok) {
-        btn.textContent = 'PIN terverifikasi!';
-        return (silent ? Promise.resolve() : playSuccess()).then(function () {
-          enterDashboard(res, pin);
+      function renderService(s) {
+        var btn = $('btn-' + s);
+        var pill = btn.querySelector('.service-pill');
+        var cd = Math.ceil((cooldownUntil[s] - Date.now()) / 1000);
+        if (mode === 'result') { btn.disabled = true; pill.textContent = 'Selesai'; }
+        else if (isBusy()) { btn.disabled = true; pill.textContent = busy[s] ? 'Mencari...' : 'Tunggu'; }
+        else if (cd > 0) { btn.disabled = true; pill.textContent = cd + 'd'; }
+        else { btn.disabled = false; pill.textContent = 'Ambil OTP'; }
+      }
+
+      function tick() {
+        if (!state.pin) return;
+        var left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        if (mode === 'idle') {
+          $('sessionLabel').textContent = 'Sesi ' + fmt(left);
+        } else {
+          $('sessionLabel').textContent = '';
+          if (countdownEl) countdownEl.textContent = 'Keluar otomatis dalam ' + left + ' detik';
+        }
+        if (left <= 0 && !isBusy()) {
+          logout(mode === 'idle'
+            ? 'Sesi berakhir karena tidak ada aktivitas. PIN kamu masih aktif, silakan masukkan lagi.'
+            : 'Sesi selesai. PIN ini sudah dipakai. Hubungi admin bila butuh verifikasi ulang.');
+          return;
+        }
+        SERVICES.forEach(renderService);
+      }
+
+      function startTicker() {
+        clearInterval(ticker);
+        tick();
+        ticker = setInterval(tick, 500);
+      }
+
+      function resetIdle() {
+        mode = 'idle';
+        deadline = Date.now() + CONFIG.IDLE_SECONDS * 1000;
+      }
+
+      /* ---------- Animasi login sukses ---------- */
+      function confetti() {
+        var layer = $('confetti');
+        layer.textContent = '';
+        var colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#06b6d4'];
+        for (var i = 0; i < 16; i++) {
+          var p = el('span', 'confetti-piece');
+          var angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.3;
+          var dist = 52 + Math.random() * 44;
+          p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+          p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+          p.style.setProperty('--rot', Math.random() * 360 + 'deg');
+          p.style.backgroundColor = colors[i % colors.length];
+          layer.appendChild(p);
+        }
+      }
+
+      async function playSuccess(pin) {
+        $('loginForm').hidden = true;
+        setLoginMsg('');
+        var wrap = $('verify'), boxes = $('pinBoxes'), done = $('verifyDone');
+        wrap.hidden = false;
+        done.hidden = true;
+        boxes.hidden = false;
+        boxes.textContent = '';
+
+        if (!reduceMotion) {
+          pin.split('').slice(0, 8).forEach(function (ch) { boxes.appendChild(el('div', 'pin-box', ch)); });
+          var kids = Array.prototype.slice.call(boxes.children);
+
+          await sleep(60);
+          // 1. kotak menyala hijau satu per satu
+          for (var i = 0; i < kids.length; i++) { kids[i].classList.add('filled'); await sleep(80); }
+          await sleep(180);
+
+          // 2. mengecil jadi titik dan merapat ke tengah
+          var step = kids[0].offsetWidth + 6;
+          var center = (kids.length - 1) / 2;
+          kids.forEach(function (k, idx) {
+            k.classList.add('dot');
+            k.style.transform = 'translateX(' + ((center - idx) * (step - 14)) + 'px) scale(.3)';
+          });
+          await sleep(380);
+        }
+
+        // 3. centang + confetti
+        boxes.hidden = true;
+        done.hidden = false;
+        if (!reduceMotion) confetti();
+        await sleep(reduceMotion ? 300 : 900);
+      }
+
+      /* ---------- Login / logout ---------- */
+      function showDash() {
+        $('verify').hidden = true;
+        $('loginView').hidden = true;
+        $('dashView').hidden = false;
+        $('greeting').textContent = state.name ? 'Halo, ' + state.name + '!' : 'Halo!';
+        SERVICES.forEach(function (s) { $('btn-' + s).classList.toggle('is-off', !state.services[s]); });
+        resetIdle();
+        startTicker();
+      }
+
+      async function doLogin(pin) {
+        if (isLoggingIn) return;
+        isLoggingIn = true;
+        var btn = $('loginBtn');
+        btn.disabled = true;
+        btn.textContent = 'Memverifikasi PIN...';
+        setLoginMsg('');
+
+        var res = await api({ action: 'login', pin: pin });
+
+        if (res && res.ok) {
+          state.pin = pin;
+          state.name = res.name || '';
+          state.services = res.services || { netflix: false, disney: false };
+          await playSuccess(pin);
+          showDash();
+        } else {
+          setLoginMsg((res && res.error) || 'PIN tidak terdaftar.');
+          $('pin').classList.add('error');
+          shake($('pin'));
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Verifikasi & Masuk';
+        isLoggingIn = false;
+      }
+
+      function logout(note) {
+        clearInterval(ticker);
+        ticker = null;
+        state.pin = '';
+        state.name = '';
+        busy.netflix = busy.disney = false;
+        cooldownUntil.netflix = cooldownUntil.disney = 0;
+        mode = 'idle';
+        countdownEl = null;
+        $('logoutBtn').disabled = false;
+        $('resultBox').hidden = true;
+        $('resultBox').textContent = '';
+        $('otherBox').hidden = true;
+        $('otherBtn').setAttribute('aria-expanded', 'false');
+        SERVICES.forEach(function (s) {
+          $('btn-' + s).disabled = false;
+          $('btn-' + s).querySelector('.service-pill').textContent = 'Ambil OTP';
         });
-      }
-      if (silent) { store.del(KEY_PIN); }
-      else { setLoginError((res && res.error) || 'PIN tidak terdaftar.'); flagBad(); }
-    }).then(function () {
-      verifying = false;
-      btn.disabled = false;
-      btn.textContent = 'Verifikasi & Masuk';
-      if (!$('viewLogin').hidden && !$('verify').classList.contains('on')) $('pin').focus();
-    });
-  }
-
-  function logout(message) {
-    store.del(KEY_PIN);
-    state.pin = null;
-    SERVICES.forEach(function (s) { clearInterval(timers[s]); busy[s] = false; });
-    $('result').textContent = '';
-    $('other').hidden = true;
-    $('otherBtn').setAttribute('aria-expanded', 'false');
-    $('viewDash').hidden = true;
-    $('viewLogin').hidden = false;
-    resetLoginView();
-    if (message) setLoginError(message);
-    $('pin').focus();
-  }
-
-  /* ---------- Cooldown (tersimpan, per layanan) ---------- */
-  function startCooldown(s, sec) {
-    store.set('cd_' + s, String(Date.now() + sec * 1000));
-    tick(s);
-  }
-
-  function tick(s) {
-    clearInterval(timers[s]);
-    var btn = $('btn-' + s), pill = btn.querySelector('.pill');
-    function render() {
-      if (!state.services[s]) {
-        btn.disabled = true; pill.textContent = 'Tidak aktif'; return false;
-      }
-      var left = Math.ceil((Number(store.get('cd_' + s) || 0) - Date.now()) / 1000);
-      if (left > 0) { btn.disabled = true; pill.textContent = left + ' dtk'; return true; }
-      btn.disabled = !!busy[s];
-      pill.textContent = busy[s] ? 'Mencari...' : 'Ambil OTP';
-      return false;
-    }
-    if (render()) {
-      timers[s] = setInterval(function () { if (!render()) clearInterval(timers[s]); }, 500);
-    }
-  }
-
-  /* ---------- Hasil ---------- */
-  function copyText(text, btn) {
-    var done = function () {
-      var old = btn.textContent;
-      btn.textContent = 'Tersalin \u2713';
-      setTimeout(function () { btn.textContent = old; }, 1600);
-    };
-    var fallback = function () {
-      var ta = document.createElement('textarea');
-      ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
-      document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); } catch (e) {}
-      document.body.removeChild(ta); done();
-    };
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(done, fallback);
-    } else { fallback(); }
-  }
-
-  function showNote(text, type) {
-    var box = $('result');
-    box.textContent = '';
-    var wrap = el('div', 'result');
-    if (type === 'loading') wrap.appendChild(el('div', 'spinner'));
-    wrap.appendChild(el('p', 'note ' + (type === 'error' ? 'error' : ''), text));
-    box.appendChild(wrap);
-  }
-
-  function showSuccess(res) {
-    var box = $('result');
-    box.textContent = '';
-    var wrap = el('div', 'result');
-
-    if (res.code) {
-      wrap.appendChild(el('p', 'label', 'Kode OTP ' + (res.label || '')));
-      var row = el('div', 'cells');
-      String(res.code).split('').forEach(function (d, i) {
-        var c = el('div', 'cell', d);
-        c.style.animationDelay = i * 70 + 'ms';
-        row.appendChild(c);
-      });
-      wrap.appendChild(row);
-      var cb = el('button', 'btn btn-copy', 'Salin Kode');
-      cb.type = 'button';
-      cb.addEventListener('click', function () { copyText(String(res.code), cb); });
-      wrap.appendChild(cb);
-    }
-
-    if (res.link && /^https:\/\//i.test(res.link)) {
-      wrap.appendChild(el('p', 'label', res.code ? 'Atau pakai link konfirmasi:' : 'Link konfirmasi ' + (res.label || '')));
-      var a = el('a', 'btn btn-open', 'Buka Link');
-      a.href = res.link; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      wrap.appendChild(a);
-      var cl = el('button', 'btn btn-copy', 'Salin Link');
-      cl.type = 'button';
-      cl.addEventListener('click', function () { copyText(res.link, cl); });
-      wrap.appendChild(cl);
-    }
-
-    if (typeof res.ageSeconds === 'number') {
-      var s = res.ageSeconds;
-      wrap.appendChild(el('p', 'meta', 'Email diterima ' + (s < 60 ? s + ' detik' : Math.round(s / 60) + ' menit') + ' yang lalu'));
-    }
-    box.appendChild(wrap);
-  }
-
-  /* ---------- Ambil OTP ---------- */
-  function requestOtp(s) {
-    if (!state.pin || busy[s]) return;
-    busy[s] = true;
-    tick(s);
-    showNote('Mencari kode ' + LABEL[s] + ' terbaru...', 'loading');
-
-    api({ action: 'otp', pin: state.pin, service: s }).then(function (res) {
-      busy[s] = false;
-
-      if (res && res.ok) {
-        showSuccess(res);
-        startCooldown(s, CONFIG.COOLDOWN_SECONDS);
-        return;
+        $('dashView').hidden = true;
+        $('verify').hidden = true;
+        $('loginForm').hidden = false;
+        $('loginView').hidden = false;
+        $('pin').value = '';
+        $('pin').classList.remove('error');
+        setLoginMsg(note || '', !!note);
+        if (!note) $('pin').focus();
       }
 
-      var msg = (res && res.error) || 'Gagal mengambil kode.';
-      // PIN dicabut / kedaluwarsa di tengah sesi -> kembali ke login
-      if (res && !res.code && /PIN/i.test(msg) && !/layanan/i.test(msg)) { logout(msg); return; }
+      /* ---------- Hasil ---------- */
+      function showLoading(s) {
+        var box = $('resultBox');
+        box.textContent = '';
+        box.appendChild(el('div', 'spinner'));
+        box.appendChild(el('p', 'msg-info', 'Mencari OTP ' + NAME[s] + ' terbaru...'));
+        box.hidden = false;
+      }
+      function showError(text) {
+        var box = $('resultBox');
+        box.textContent = '';
+        box.appendChild(el('p', 'msg-error', text));
+        box.hidden = false;
+      }
+      function showSuccess(res) {
+        var box = $('resultBox');
+        box.textContent = '';
 
-      showNote(msg, 'error');
-      if (res && (res.code === 'COOLDOWN' || res.code === 'NOT_FOUND')) {
-        startCooldown(s, res.retryAfter || CONFIG.COOLDOWN_SECONDS);
-      } else { tick(s); }
-    });
-  }
+        if (res.code) {
+          box.appendChild(el('p', 'msg-info', 'Kode OTP ' + (res.label || '')));
+          var row = el('div', 'otp-digits-row');
+          String(res.code).split('').forEach(function (d, i) {
+            var c = el('div', 'otp-cell', d);
+            c.style.animationDelay = (i * 60) + 'ms';
+            row.appendChild(c);
+          });
+          box.appendChild(row);
+          var cb = el('button', 'btn-copy', 'Salin Kode');
+          cb.type = 'button';
+          cb.addEventListener('click', function () { copyText(String(res.code), cb); });
+          box.appendChild(cb);
+        }
 
-  /* ---------- Aplikasi lainnya ---------- */
-  function toggleOther() {
-    var box = $('other'), open = box.hidden;
-    if (open) {
-      var msg = CONFIG.WA_MESSAGE + (state.pin ? ' PIN saya: ' + state.pin : '');
-      $('waLink').href = 'https://wa.me/' + CONFIG.WA_NUMBER + '?text=' + encodeURIComponent(msg);
-      $('tgLink').href = 'https://t.me/' + CONFIG.TELEGRAM_USERNAME;
-    }
-    box.hidden = !open;
-    $('otherBtn').setAttribute('aria-expanded', String(open));
-  }
+        // Link hanya diterima bila https (pertahanan tambahan di sisi browser)
+        if (res.link && /^https:\/\//i.test(res.link)) {
+          box.appendChild(el('p', 'msg-info', 'Link konfirmasi ' + (res.label || '')));
+          var a = el('a', 'otp-link', 'Buka Link Konfirmasi');
+          a.href = res.link; a.target = '_blank'; a.rel = 'noopener noreferrer';
+          box.appendChild(a);
+          box.appendChild(document.createElement('br'));
+          var cl = el('button', 'btn-copy', 'Salin Link');
+          cl.type = 'button';
+          cl.addEventListener('click', function () { copyText(res.link, cl); });
+          box.appendChild(cl);
+        }
 
-  /* ---------- Init ---------- */
-  function init() {
-    initTheme();
-    $('brand').textContent = CONFIG.STORE_NAME;
-    document.title = CONFIG.STORE_NAME + ' - Portal OTP';
+        if (typeof res.ageSeconds === 'number') {
+          var m = el('p', 'msg-info', 'Email diterima ' + ago(res.ageSeconds) + ' yang lalu');
+          m.style.marginTop = '10px';
+          box.appendChild(m);
+        }
 
-    $('pin').addEventListener('input', function () {
-      this.value = this.value.toUpperCase().replace(/\s+/g, '');
-      this.classList.remove('bad');
-      setLoginError('');
-    });
-    $('loginForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var pin = $('pin').value.trim().toUpperCase();
-      if (!pin) { setLoginError('Masukkan PIN terlebih dahulu.'); flagBad(); return; }
-      login(pin, false);
-    });
-    SERVICES.forEach(function (s) { $('btn-' + s).addEventListener('click', function () { requestOtp(s); }); });
-    $('otherBtn').addEventListener('click', toggleOther);
-    $('logoutBtn').addEventListener('click', function () { logout(); });
+        box.appendChild(el('p', 'msg-warn', res.deactivated
+          ? 'PIN ini sudah dinonaktifkan. Salin kode sekarang.'
+          : 'Salin kode sekarang, halaman akan keluar otomatis.'));
+        countdownEl = el('p', 'msg-info countdown');
+        box.appendChild(countdownEl);
+        box.hidden = false;
+      }
 
-    var saved = store.get(KEY_PIN);
-    if (saved) login(saved, true); else $('pin').focus();
-  }
+      async function requestOtp(s) {
+        if (!state.pin || isBusy() || mode !== 'idle') return;
 
-  document.addEventListener('DOMContentLoaded', init);
-})();
-</script>
+        resetIdle(); // menekan tombol layanan dihitung sebagai aktivitas
+
+        if (!state.services[s]) {
+          showError('PIN kamu tidak terdaftar untuk layanan ' + NAME[s] + '.');
+          return;
+        }
+
+        busy[s] = true;
+        $('logoutBtn').disabled = true; // jangan keluar saat kode sedang diambil
+        showLoading(s);
+        tick();
+
+        var res = await api({ action: 'otp', pin: state.pin, service: s });
+        busy[s] = false;
+        $('logoutBtn').disabled = false;
+        if (!state.pin) return;
+
+        if (res && res.ok) {
+          showSuccess(res);
+          mode = 'result';
+          deadline = Date.now() + CONFIG.RESULT_SECONDS * 1000;
+          tick();
+          return;
+        }
+
+        showError((res && res.error) || 'Gagal mengambil kode.');
+        if (res && (res.code === 'COOLDOWN' || res.code === 'NOT_FOUND')) {
+          cooldownUntil[s] = Date.now() + (res.retryAfter || CONFIG.COOLDOWN_SECONDS) * 1000;
+        }
+        resetIdle();
+        tick();
+      }
+
+      /* ---------- Aplikasi Lainnya ---------- */
+      function toggleOther() {
+        var box = $('otherBox');
+        var open = box.hidden;
+        if (open) {
+          var msg = CONFIG.WA_MESSAGE + (state.pin ? ' PIN saya: ' + state.pin : '');
+          $('waLink').href = 'https://wa.me/' + CONFIG.WA_NUMBER + '?text=' + encodeURIComponent(msg);
+          $('tgLink').href = 'https://t.me/' + CONFIG.TELEGRAM_USERNAME;
+        }
+        box.hidden = !open;
+        $('otherBtn').setAttribute('aria-expanded', String(open));
+      }
+
+      /* ---------- Init ---------- */
+      function init() {
+        document.title = CONFIG.STORE_NAME + ' - Portal OTP';
+        $('brandBadge').textContent = CONFIG.STORE_NAME;
+        applyThemeIcon();
+
+        $('themeBtn').addEventListener('click', toggleTheme);
+        $('logoutBtn').addEventListener('click', function () { logout(); });
+        $('otherBtn').addEventListener('click', toggleOther);
+        SERVICES.forEach(function (s) {
+          $('btn-' + s).addEventListener('click', function () { requestOtp(s); });
+        });
+
+        // Tab kembali aktif (HP dikunci / pindah aplikasi): cek waktu langsung
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) tick(); });
+
+        $('pin').addEventListener('input', function (e) {
+          var v = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+          if (v !== e.target.value) e.target.value = v;
+          e.target.classList.remove('error');
+          setLoginMsg('');
+        });
+
+        $('loginForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var pin = $('pin').value.trim().toUpperCase();
+          if (!pin) {
+            setLoginMsg('Masukkan PIN terlebih dahulu.');
+            $('pin').classList.add('error');
+            shake($('pin'));
+            return;
+          }
+          doLogin(pin);
+        });
+
+        $('pin').focus();
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    })();
+  </script>
 </body>
 </html>
